@@ -13,12 +13,12 @@ locationsRouter.get('/', async (req, res, next) => {
 
 locationsRouter.post('/', async (req, res, next) => {
     try {
-        const newfoodLocation = new FoodLocation({
+        const newFoodLocation = new FoodLocation({
             name: req.body.name,
             address: req.body.address
         })
-        
-        res.json({message: "Updated food location " + req.body.name})
+        await newFoodLocation.save()
+        res.json({ message: "Updated food location " + req.body.name })
     } catch (error) {
         next()
     }
