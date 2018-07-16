@@ -57,20 +57,20 @@ test('GET/:id should return the user searched for', async () => {
     // expect(response.body._id).toBe(dummyUsers.userAdmin._id)
 });
 
-test.skip('POST/users should return a 201 status and increase the Food locations list by 1. newLocations search should find the newly created location.',
+test('POST/users should return a 201 status and increase the Food locations list by 1. newLocations search should find the newly created location.',
     async () => {
         const response = await request(dummyApp)
-            .post('/locations')
+            .post('/users')
             .send({
-                name: "Posted name",
-                address: "Posted address",
-                rating: 7
+                name: "Created User",
+                age: 40,
+                admin: false
             })
         expect(response.status).toBe(201)
-        const updatedList = await request(dummyApp).get('/locations')
-        const newLocationSearch = await FoodLocation.find({ name: "Posted name" })
-        expect(updatedList.body.length).toBe(3)
-        expect(newLocationSearch.length).toBe(1)
+        const updatedList = await request(dummyApp).get('/users')
+        const newUser = await User.find({ name: "Created User" })
+        expect(updatedList.body.length).toBe(4)
+        expect(newUser.length).toBe(1)
     });
 
 test('PUT/users/:id should return a message that a location has been updated. Should also update the location in the db', async () => {
@@ -78,6 +78,13 @@ test('PUT/users/:id should return a message that a location has been updated. Sh
     const searchedUser = await User.findById(dummyUsers.user2._id)
     expect(response.status).toBe(200)
     expect(searchedUser.name).toBe("updated name")
+});
+
+test('DELETE/locations/:id should return a 200 status and remove the deleted location from the list', async () => {
+    const response = await request(dummyApp).delete(`/users/${dummyUsers.user1._id}`)
+    const searchedUser = await User.find({ _id: dummyUsers.user1._id })
+    expect(response.status).toBe(200)
+    expect(searchedUser.length).toBe(0)
 });
 
 afterAll(() => {

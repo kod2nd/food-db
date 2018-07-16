@@ -4,6 +4,20 @@ const User = require('../models/user')
 const bodyParser = require('body-parser')
 usersRouter.use(bodyParser())
 
+usersRouter.post('/', async (req, res, next) => {
+    try {
+        const newUser = new User({
+            name: req.body.name,
+            age: req.body.age,
+            admin: req.body.admin
+        })
+        await newUser.save()
+        res.status(201).json({ message: "Updated user " + req.body.name })
+    } catch (error) {
+        next()
+    }
+})
+
 usersRouter.get('/', async (req, res, next) => {
     try {
         const users = await User.find()
@@ -41,6 +55,16 @@ usersRouter.put('/:id', async (req, res, next) => {
     } catch (error) {
         next()
     }
+})
+
+usersRouter.delete('/:id', async (req, res, next) => {
+    const toDelete = User.findByIdAndDelete(req.params.id)
+    await toDelete.exec(error => {
+        if (error) {
+            next()
+        }
+        res.json({ message: "Successful Delete" })
+    })
 })
 
 module.exports = (app) => {
