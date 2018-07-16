@@ -1,0 +1,201 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "Food Trail DB"
+    },
+    "servers": [
+      {
+        "url": "https://kod2nd-food-db.herokuapp.com/"
+      }
+    ],
+    "paths": {
+      "/api-help": {
+        "get": {
+          "summary": "API documentation",
+          "tags": [
+            "API Help Page"
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful request"
+            }
+          }
+        }
+      },
+      "/locations": {
+        "get": {
+          "summary": "Shows a list of stored food locations",
+          "tags": [
+            "Locations"
+          ],
+          "parameters": [
+            {
+              "name": "yrstart",
+              "in": "query",
+              "required": false,
+              "description": "Filters HDBs with lease commence dates greater or equal to than yrstart.\n\nE.g. yrstart = 1980 returns a list of HDBs with lease commences dates later than or including 1980.",
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "yrend",
+              "in": "query",
+              "required": false,
+              "description": "Filter HDBs with lease commence dates greater or equal to than yrend.\n\nE.g. yrend = 2011 returns a list of HDBs with lease commences dates before or including 2011.",
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "rooms",
+              "in": "query",
+              "required": false,
+              "description": " Filter HDBs by flat type (e.g. enter rooms = 3 to retrieve all 3 room flats)",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Expected response to a valid request",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "example": {
+                      "month": "2015-01",
+                      "town": "ANG MO KIO",
+                      "flat_type": "3 ROOM",
+                      "block": "174",
+                      "street_name": "ANG MO KIO AVE 4",
+                      "storey_range": "07 TO 09",
+                      "floor_area_sqm": "60",
+                      "flat_model": "Improved",
+                      "lease_commence_date": "1986",
+                      "remaining_lease": "70",
+                      "resale_price": "255000",
+                      "id": 1234
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Bad request"
+            }
+          }
+        },
+        "post": {
+          "summary": "Shows a list of stored food locations",
+          "tags": [
+            "Locations"
+          ],
+          "parameters": [
+            {
+              "name": "yrstart",
+              "in": "query",
+              "required": false,
+              "description": "Filters HDBs with lease commence dates greater or equal to than yrstart.\n\nE.g. yrstart = 1980 returns a list of HDBs with lease commences dates later than or including 1980.",
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "yrend",
+              "in": "query",
+              "required": false,
+              "description": "Filter HDBs with lease commence dates greater or equal to than yrend.\n\nE.g. yrend = 2011 returns a list of HDBs with lease commences dates before or including 2011.",
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "rooms",
+              "in": "query",
+              "required": false,
+              "description": " Filter HDBs by flat type (e.g. enter rooms = 3 to retrieve all 3 room flats)",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Expected response to a valid request",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "example": {
+                      "month": "2015-01",
+                      "town": "ANG MO KIO",
+                      "flat_type": "3 ROOM",
+                      "block": "174",
+                      "street_name": "ANG MO KIO AVE 4",
+                      "storey_range": "07 TO 09",
+                      "floor_area_sqm": "60",
+                      "flat_model": "Improved",
+                      "lease_commence_date": "1986",
+                      "remaining_lease": "70",
+                      "resale_price": "255000",
+                      "id": 1234
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Bad request"
+            }
+          }
+        }
+      },
+      "/locations/{id}": {
+        "put": {
+          "summary": "Shows a single HDB",
+          "tags": [
+            "HDB Resale lists"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "Filters HDB by id. Returns a single HDB object.",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Request Valid!"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Shows a single HDB",
+          "tags": [
+            "HDB Resale lists"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "Filters HDB by id. Returns a single HDB object.",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Request Valid!"
+            }
+          }
+        }
+      }
+    }
+  }

@@ -1,13 +1,14 @@
 const express = require('express')
 const request = require('supertest')
-const locationsRouter = require('./locations')
-const FoodLocation = require('../models/location')
+
+const dummyApp = express()
 
 const { MongoMemoryServer } = require('mongodb-memory-server')
 const mongod = new MongoMemoryServer();
 const mongoose = require('mongoose')
 
-const dummyApp = express()
+const locationsRouter = require('./locations')
+const FoodLocation = require('../models/location')
 locationsRouter(dummyApp)
 
 let fakeLocations = {}
@@ -37,7 +38,6 @@ beforeAll(async () => {
     await addFakeLocations()
 })
 
-
 test('GET/locations body should have length 2 ', async () => {
     const response = await request(dummyApp).get('/locations')
     expect(response.status).toBe(200)
@@ -51,25 +51,37 @@ test('GET/locations/:id should return the location based on the id that the user
     expect(response.body._id).toBe(String(fakeLocations.location2._id))
 });
 
-test('POST/locations should return a 201 status and increase the locations array by 1 ', 
-async () => {
-    const newFoodLocation = new FoodLocation({
-        name: "Posted name",
-        address: "Posted address",
-        rating: 7
-    })
+test('POST/locations should return a 201 status and increase the Food locations list by 1. newLocations search should find the newly created location.',
+    async () => {
+        const response = await request(dummyApp)
+            .post('/locations')
+            .send({
+                name: "Posted name",
+                address: "Posted address",
+                rating: 7
+            })
+        expect(response.status).toBe(201)
+        const updatedList = await request(dummyApp).get('/locations')
+        const newLocationSearch = await FoodLocation.find({ name: "Posted name" })
+        expect(updatedList.body.length).toBe(3)
+        expect(newLocationSearch.length).toBe(1)
+    });
 
-    await newFoodLocation.save()
-    const response = await request(dummyApp).post('/locations')
-    // Cant get the status to work!
-    // expect(response.status).toBe(201)
-    const locationsList = await FoodLocation.find()
-    expect(locationsList.length).toBe(3)
+test('PUT/locations/:id should return a message that a location has been updated. Should also update the location in the db', async () => {
+    const response = await request(dummyApp).put(`/locations/${fakeLocations.location2._id}`).send({name: "updated name"})
+    const searchedLocation = await FoodLocation.find({ _id: fakeLocations.location2._id })
+    expect(response.status).toBe(200)
+    expect(searchedLocation[0].name).toBe("updated name")
 });
 
+test('DELETE/locations/:id should return a 200 status and remove the deleted location from the list', async () => {
+    const response = await request(dummyApp).delete(`/locations/${fakeLocations.location1._id}`)
+    const searchedLocation = await FoodLocation.find({ _id: fakeLocations.location1._id })
+    expect(response.status).toBe(200)
+    expect(searchedLocation.length).toBe(0)
+});
 
 afterAll(() => {
     mongoose.disconnect();
     mongod.stop()
 })
-
