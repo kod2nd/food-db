@@ -11,14 +11,24 @@ locationsRouter.get('/', async (req, res, next) => {
     }
 })
 
+locationsRouter.get('/:id', async (req, res, next) => {
+    try {
+        const foodLocation = await FoodLocation.findById(req.params.id)
+        res.json(foodLocation)
+    } catch (error) {
+        next()
+    }
+})
+
 locationsRouter.post('/', async (req, res, next) => {
     try {
         const newFoodLocation = new FoodLocation({
             name: req.body.name,
-            address: req.body.address
+            address: req.body.address,
+            rating: req.body.rating
         })
         await newFoodLocation.save()
-        res.json({ message: "Updated food location " + req.body.name })
+        res.status(201).json({ message: "Updated food location " + req.body.name })
     } catch (error) {
         next()
     }
