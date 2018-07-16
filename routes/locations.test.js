@@ -17,12 +17,16 @@ const addFakeLocations = async () => {
     const location1 = new FoodLocation({
         name: 'Good Food',
         address: "Somewhere Street",
+        lat: 103.82321,
+        lng: 1.24125,
         rating: 9
     })
 
     const location2 = new FoodLocation({
         name: 'Alright Food',
         address: "Over There Avenue",
+        lat: 103.82421,
+        lng: 1.24165,
         rating: 6
     })
 

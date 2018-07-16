@@ -9,6 +9,8 @@ locationsRouter.post('/', async (req, res, next) => {
         const newFoodLocation = new FoodLocation({
             name: req.body.name,
             address: req.body.address,
+            lat: req.body.lat,
+            lng: req.body.lng,
             rating: req.body.rating
         })
         await newFoodLocation.save()
