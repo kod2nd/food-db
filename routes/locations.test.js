@@ -8,9 +8,13 @@ const mongod = new MongoMemoryServer();
 const mongoose = require('mongoose')
 
 const locationsRouter = require('./locations')
+const usersRouter = require('./users')
+const User = require('../models/user')
 const FoodLocation = require('../models/location')
 locationsRouter(dummyApp)
+usersRouter(dummyApp)
 
+// Dummy Locations
 let dummyLocations = {}
 
 const addDummyLocations = async () => {
@@ -34,12 +38,42 @@ const addDummyLocations = async () => {
     dummyLocations.location2 = await location2.save()
 }
 
+// User Login
+let bearerjwtToken
+
+const signUpAsAdmin = async () => {
+    // let email = fixtures.users.tom.email;
+    let signUpResponse = await request(dummyApp)
+        .post('/users/signup')
+        .send({
+            username: "admin",
+            password: "12345678",
+            admin: true
+        });
+
+    // expect(signUpResponse.statusCode).toBe(200);
+}
+
+const signInAsAdmin = async () => {
+    let signInResponse = await request(dummyApp)
+        .post('/users/signin')
+        .send({
+            username: "admin",
+            password: "12345678"
+        })
+    bearerjwtToken = "bearer " + signInResponse.body.token;
+}
+
+
+// Tests
 beforeAll(async () => {
     jest.setTimeout(120000);
     const uri = await mongod.getConnectionString();
     await mongoose.connect(uri)
 
     await addDummyLocations()
+    await signUpAsAdmin()
+    await signInAsAdmin()
 })
 
 test('GET/locations body should have length 2 ', async () => {
@@ -73,14 +107,14 @@ test('POST/locations should return a 201 status and increase the Food locations 
     });
 
 test('PUT/locations/:id should return a message that a location has been updated. Should also update the location in the db', async () => {
-    const response = await request(dummyApp).put(`/locations/${dummyLocations.location2._id}`).send({name: "updated name"})
+    const response = await request(dummyApp).put(`/locations/${dummyLocations.location2._id}`).send({ name: "updated name" })
     const searchedLocation = await FoodLocation.findById(dummyLocations.location2._id)
     expect(response.status).toBe(200)
     expect(searchedLocation.name).toBe("updated name")
 });
 
 test('DELETE/locations/:id should return a 200 status and remove the deleted location from the list', async () => {
-    const response = await request(dummyApp).delete(`/locations/${dummyLocations.location1._id}`)
+    const response = await request(dummyApp).delete(`/locations/${dummyLocations.location1._id}`).set("Authorization", bearerjwtToken)
     const searchedLocation = await FoodLocation.find({ _id: dummyLocations.location1._id })
     expect(response.status).toBe(200)
     expect(searchedLocation.length).toBe(0)

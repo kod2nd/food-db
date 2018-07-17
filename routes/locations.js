@@ -2,7 +2,9 @@ const express = require('express')
 const locationsRouter = express.Router()
 const FoodLocation = require('../models/location')
 const bodyParser = require('body-parser')
+const { passport } = require('../config/passport')
 locationsRouter.use(bodyParser())
+
 
 locationsRouter.post('/', async (req, res, next) => {
     try {
@@ -48,7 +50,7 @@ locationsRouter.put('/:id', async (req, res, next) => {
             }
             res.json({
                 message: "Successfully updated!",
-                id: req.params.id, 
+                id: req.params.id,
                 name: selectedFoodLocation.name,
                 address: selectedFoodLocation.address,
                 rating: selectedFoodLocation.rating,
@@ -59,7 +61,9 @@ locationsRouter.put('/:id', async (req, res, next) => {
     }
 })
 
-locationsRouter.delete('/:id', async (req, res, next) => {
+locationsRouter.delete('/:id',
+ passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
     const toDelete = FoodLocation.findByIdAndDelete(req.params.id)
     await toDelete.exec(error => {
         if (error) {

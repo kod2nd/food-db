@@ -5,6 +5,10 @@ require('dotenv').config()
 app.use(bodyParser())
 app.use(express.json())
 
+// Passport
+const {passport} = require('./config/passport')
+app.use(passport.initialize())
+
 // API-Documentation
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger-deploy.json');
