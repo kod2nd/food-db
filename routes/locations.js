@@ -43,11 +43,13 @@ locationsRouter.get('/:id', async (req, res, next) => {
 locationsRouter.put('/:id', async (req, res, next) => {
     try {
         const toUpdate = FoodLocation.findByIdAndUpdate(req.params.id, req.body)
+        console.log(req.body)
         const selectedFoodLocation = await FoodLocation.findById(req.params.id)
         await toUpdate.exec(error => {
             if (error) {
                 next()
             }
+            // ================= Need to do a get again to display updated data===============
             res.json({
                 message: "Successfully updated!",
                 id: req.params.id,
@@ -61,9 +63,11 @@ locationsRouter.put('/:id', async (req, res, next) => {
     }
 })
 
-locationsRouter.delete('/:id',
- passport.authenticate('jwt', { session: false }),
-  async (req, res, next) => {
+locationsRouter.delete('/:id', passport.authenticate('jwt', { session: false }), async (req, res, next) => {
+    if(req.user.admin !== true){
+        res.status(401).json({message: "You do not have the required access rights!"})
+        return
+    }
     const toDelete = FoodLocation.findByIdAndDelete(req.params.id)
     await toDelete.exec(error => {
         if (error) {

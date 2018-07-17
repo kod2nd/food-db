@@ -10,13 +10,15 @@ const userSchema = mongoose.Schema(
       unique: true,
       required: [true, "cannot be blank"],
       match: [/^[a-zA-Z0-9\s]+$/, "is invalid"],
-      index: true
+      index: true 
     },
     name: String,
     age: Number,
     admin: Boolean,
     hash: String,
-    salt: String
+    salt: String,
+    // locations should be a populating thing
+    locations: [{name: String, address: String, lat: String, lng: String, rating: Number }]
   },
   { timestamps: true }
 );

@@ -39,29 +39,26 @@ const addDummyLocations = async () => {
 }
 
 // User Login
-let bearerjwtToken
+let adminBearerjwtToken
 
-const signUpAsAdmin = async () => {
-    // let email = fixtures.users.tom.email;
+const signUp = async (isAdmin=false) => {
     let signUpResponse = await request(dummyApp)
         .post('/users/signup')
         .send({
             username: "admin",
             password: "12345678",
-            admin: true
+            admin: isAdmin
         });
-
-    // expect(signUpResponse.statusCode).toBe(200);
 }
 
-const signInAsAdmin = async () => {
+const signIn = async () => {
     let signInResponse = await request(dummyApp)
         .post('/users/signin')
         .send({
             username: "admin",
             password: "12345678"
         })
-    bearerjwtToken = "bearer " + signInResponse.body.token;
+    adminBearerjwtToken = "bearer " + signInResponse.body.token;
 }
 
 
@@ -72,8 +69,8 @@ beforeAll(async () => {
     await mongoose.connect(uri)
 
     await addDummyLocations()
-    await signUpAsAdmin()
-    await signInAsAdmin()
+    await signUp(true)
+    await signIn()
 })
 
 test('GET/locations body should have length 2 ', async () => {
@@ -114,7 +111,7 @@ test('PUT/locations/:id should return a message that a location has been updated
 });
 
 test('DELETE/locations/:id should return a 200 status and remove the deleted location from the list', async () => {
-    const response = await request(dummyApp).delete(`/locations/${dummyLocations.location1._id}`).set("Authorization", bearerjwtToken)
+    const response = await request(dummyApp).delete(`/locations/${dummyLocations.location1._id}`).set("Authorization", adminBearerjwtToken)
     const searchedLocation = await FoodLocation.find({ _id: dummyLocations.location1._id })
     expect(response.status).toBe(200)
     expect(searchedLocation.length).toBe(0)

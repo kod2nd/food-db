@@ -1,27 +1,12 @@
 const express = require('express')
 const usersRouter = express.Router()
 const User = require('../models/user')
+const FoodLocation = require('../models/location')
 const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
 const { passport, jwtOptions } = require('../config/passport')
 
 usersRouter.use(bodyParser())
-
-// usersRouter.post('/', async (req, res, next) => {
-
-//     try {
-//         const newUser = new User({
-//             username: req.body.username,
-//             name: req.body.name,
-//             age: req.body.age,
-//             admin: req.body.admin
-//         })
-//         await newUser.save()
-//         res.status(201).json({ message: "Created user " + req.body.name })
-//     } catch (error) {
-//         next()
-//     }
-// })
 
 usersRouter.post("/signup", async (req, res, next) => {
     const { username, password, name, age, admin } = req.body;
@@ -104,6 +89,15 @@ usersRouter.delete('/:id', async (req, res, next) => {
         }
         res.json({ message: "Successful Delete" })
     })
+})
+
+usersRouter.post('/:username/locations', async (req, res, next) => {
+    const specificUser = await User.findOne({username: req.params.username})
+    // console.log(specificUser)
+    const updatedLocations = [...specificUser.locations, {name: "You have been updated"}]
+    const updatedUser = await User.findByIdAndUpdate(specificUser._id, updatedLocations)
+    console.log(updatedUser)
+    res.json(updatedUser)
 })
 
 module.exports = (app) => {
