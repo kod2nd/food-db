@@ -17,8 +17,7 @@ const userSchema = mongoose.Schema(
     admin: Boolean,
     hash: String,
     salt: String,
-    // locations should be a populating thing
-    locations: [String]
+    locations: [{type: mongoose.Schema.Types.ObjectId, ref: "FoodLocation"}]
   },
   { timestamps: true }
 );

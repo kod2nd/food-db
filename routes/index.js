@@ -1,7 +1,6 @@
 const express = require('express')
 const indexRouter = express.Router()
-const bodyParser = require('body-parser')
-indexRouter.use(bodyParser())
+indexRouter.use(express.json())
 
 indexRouter.get('/', (req, res, next) => {
     res.json({

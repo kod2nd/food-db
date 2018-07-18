@@ -2,11 +2,11 @@ const express = require('express')
 const usersRouter = express.Router()
 const User = require('../models/user')
 const FoodLocation = require('../models/location')
-const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
 const { passport, jwtOptions } = require('../config/passport')
+const mongoose = require('mongoose')
 
-usersRouter.use(bodyParser())
+usersRouter.use(express.json())
 
 usersRouter.post("/signup", async (req, res, next) => {
     const { username, password, name, age, admin } = req.body;
@@ -48,7 +48,7 @@ usersRouter.post("/signin", async (req, res) => {
 
 usersRouter.get('/', async (req, res, next) => {
     try {
-        const users = await User.find()
+        const users = await User.find().populate('locations')
         res.json(users)
     } catch (error) {
         next()
@@ -92,16 +92,33 @@ usersRouter.delete('/:id', async (req, res, next) => {
 })
 
 usersRouter.post('/:username/locations', async (req, res, next) => {
-    
-    const newFoodLocation = new FoodLocation({
-        name: req.body.name,
-        address: req.body.address,
-        lat: req.body.lat,
-        lng: req.body.lng,
-        rating: req.body.rating
-    })
-    await newFoodLocation.save()
-    res.json({message: "Your location has been added!"})
+    let locationIdToSaveIntoUsers
+    const inputLat = req.body.lat
+    const inputLng = req.body.lng
+    const requestedLocation = await FoodLocation.findOne({ lat: inputLat, lng: inputLng })
+    const user = await User.findOne({ username: req.params.id })
+    const userId = user._id
+    let userLocations = user.locations
+
+    if (!requestedLocation) {
+        const newFoodLocation = new FoodLocation({
+            name: req.body.name,
+            address: req.body.address,
+            lat: req.body.lat,
+            lng: req.body.lng,
+            rating: req.body.rating
+        })
+        locationIdToSaveIntoUsers = (await newFoodLocation.save())._id
+
+    } else {
+        locationIdToSaveIntoUsers = requestedLocation._id;
+    }
+
+    if (user.locations.indexOf(locationIdToSaveIntoUsers) === -1) {
+        userLocations = [...userLocations, locationIdToSaveIntoUsers]
+        await User.findByIdAndUpdate(userId, { locations: userLocations })
+        res.json({ message: "Your location has been added!" })
+    } else { res.status(400).json({ message: "You already have that location saved!" }) }
 })
 
 module.exports = (app) => {

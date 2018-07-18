@@ -1,9 +1,8 @@
 const express = require('express')
 const locationsRouter = express.Router()
 const FoodLocation = require('../models/location')
-const bodyParser = require('body-parser')
 const { passport } = require('../config/passport')
-locationsRouter.use(bodyParser())
+locationsRouter.use(express.json())
 
 
 locationsRouter.post('/', async (req, res, next) => {
