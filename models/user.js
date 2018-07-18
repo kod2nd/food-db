@@ -18,7 +18,7 @@ const userSchema = mongoose.Schema(
     hash: String,
     salt: String,
     // locations should be a populating thing
-    locations: [{name: String, address: String, lat: String, lng: String, rating: Number }]
+    locations: [String]
   },
   { timestamps: true }
 );

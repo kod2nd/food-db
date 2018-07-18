@@ -41,7 +41,7 @@ const addDummyLocations = async () => {
 // User Login
 let adminBearerjwtToken
 
-const signUp = async (isAdmin=false) => {
+const signUp = async (isAdmin = false) => {
     let signUpResponse = await request(dummyApp)
         .post('/users/signup')
         .send({
@@ -86,7 +86,18 @@ test('GET/locations/:id should return the location based on the id that the user
     expect(response.body._id).toBe(String(dummyLocations.location2._id))
 });
 
-// =======================How to refresh DB every time!==========================
+test('POST/locations Lat and Lng are required fields. Should return a 500 status if required field(s) are not presented.', async () => {
+    const response = await request(dummyApp)
+            .post('/locations')
+            .send({
+                name: "Without lng",
+                address: "Without lng",
+                lat: 103.841602,
+                rating: 0
+            })
+    expect(response.status).toBe(500)
+});
+
 test('POST/locations should return a 201 status and increase the Food locations list by 1. newLocations search should find the newly created location.',
     async () => {
         const response = await request(dummyApp)
@@ -94,6 +105,8 @@ test('POST/locations should return a 201 status and increase the Food locations 
             .send({
                 name: "Posted name",
                 address: "Posted address",
+                lat: 103.841602,
+                lng: 1.279451,
                 rating: 7
             })
         expect(response.status).toBe(201)

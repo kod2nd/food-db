@@ -18,7 +18,7 @@ locationsRouter.post('/', async (req, res, next) => {
         await newFoodLocation.save()
         res.status(201).json({ message: "Updated food location " + req.body.name })
     } catch (error) {
-        next()
+        next(error)
     }
 })
 
@@ -43,29 +43,28 @@ locationsRouter.get('/:id', async (req, res, next) => {
 locationsRouter.put('/:id', async (req, res, next) => {
     try {
         const toUpdate = FoodLocation.findByIdAndUpdate(req.params.id, req.body)
-        console.log(req.body)
         const selectedFoodLocation = await FoodLocation.findById(req.params.id)
-        await toUpdate.exec(error => {
+        await toUpdate.exec(async error => {
             if (error) {
                 next()
             }
-            // ================= Need to do a get again to display updated data===============
-            res.json({
-                message: "Successfully updated!",
-                id: req.params.id,
-                name: selectedFoodLocation.name,
-                address: selectedFoodLocation.address,
-                rating: selectedFoodLocation.rating,
-            })
+        const FoodLocationAfterUpdate = await FoodLocation.findById(req.params.id)
+        res.json({
+            message: "Successfully updated!",
+            id: req.params.id,
+            name: FoodLocationAfterUpdate.name,
+            address: FoodLocationAfterUpdate.address,
+            rating: FoodLocationAfterUpdate.rating,
         })
+    })
     } catch (error) {
-        next()
-    }
+    next()
+}
 })
 
 locationsRouter.delete('/:id', passport.authenticate('jwt', { session: false }), async (req, res, next) => {
-    if(req.user.admin !== true){
-        res.status(401).json({message: "You do not have the required access rights!"})
+    if (req.user.admin !== true) {
+        res.status(401).json({ message: "You do not have the required access rights!" })
         return
     }
     const toDelete = FoodLocation.findByIdAndDelete(req.params.id)

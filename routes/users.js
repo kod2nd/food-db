@@ -92,12 +92,16 @@ usersRouter.delete('/:id', async (req, res, next) => {
 })
 
 usersRouter.post('/:username/locations', async (req, res, next) => {
-    const specificUser = await User.findOne({username: req.params.username})
-    // console.log(specificUser)
-    const updatedLocations = [...specificUser.locations, {name: "You have been updated"}]
-    const updatedUser = await User.findByIdAndUpdate(specificUser._id, updatedLocations)
-    console.log(updatedUser)
-    res.json(updatedUser)
+    
+    const newFoodLocation = new FoodLocation({
+        name: req.body.name,
+        address: req.body.address,
+        lat: req.body.lat,
+        lng: req.body.lng,
+        rating: req.body.rating
+    })
+    await newFoodLocation.save()
+    res.json({message: "Your location has been added!"})
 })
 
 module.exports = (app) => {
