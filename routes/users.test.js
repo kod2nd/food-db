@@ -9,30 +9,35 @@ const mongoose = require('mongoose')
 
 const usersRouter = require('./users')
 const User = require('../models/user')
+const FoodLocation = require('../models/location')
 usersRouter(dummyApp)
 
 let dummyUsers = {}
 
 const addDummyUsers = async () => {
     const userAdmin = new User({
-        username: "Admin",
+        username: "admin",
         name: "Admin",
         age: 100,
-        admin: false
+        admin: true,
+        locations: []
     })
 
     const user1 = new User({
-        username: "Steve",
+
+        username: "steve",
         name: "Steve",
         age: 20,
-        admin: false
+        admin: false,
+        locations: []
     })
 
     const user2 = new User({
-        username: "Holger",
+        username: "holger",
         name: "Holger",
         age: 50,
-        admin: false
+        admin: false,
+        locations: []
     })
 
     dummyUsers.userAdmin = await userAdmin.save()
@@ -60,25 +65,9 @@ test('GET/users body should have length 3 ', async () => {
 test('GET/:id should return the user searched for', async () => {
     const response = await request(dummyApp).get(`/users/${dummyUsers.userAdmin._id}`)
     expect(response.status).toBe(200)
-    // expect(response.body._id).toBe(dummyUsers.userAdmin._id)
+    expect(response.body._id).toBe(String(dummyUsers.userAdmin._id))
 });
 
-// test('POST/users should return a 201 status and increase the Users list by 1. newUser search should find the newly created user.',
-//     async () => {
-//         const response = await request(dummyApp)
-//             .post('/users')
-//             .send({
-//                 username: "Created User",
-//                 name: "Created User",
-//                 age: 40,
-//                 admin: false
-//             })
-//         expect(response.status).toBe(201)
-//         const updatedList = await request(dummyApp).get('/users')
-//         const newUser = await User.find({ name: "Created User" })
-//         expect(updatedList.body.length).toBe(4)
-//         expect(newUser.length).toBe(1)
-//     });
 
 test('PUT/users/:id should return a message that a user has been updated. Should also update the user in the db', async () => {
     const response = await request(dummyApp).put(`/users/${dummyUsers.user2._id}`).send({ name: "updatedname" })
@@ -101,10 +90,10 @@ test('POST/signup should return status 201 and send success message to the user.
             username: "newSignUpUser",
             password: "12345678"
         })
-    const searchedUser = await User.findOne({username: "newSignUpUser"})
-expect(response.status).toBe(201)
-expect(response.body.message.length).toBeGreaterThan(0)
-expect(searchedUser).toHaveProperty('username', 'newsignupuser')
+    const searchedUser = await User.findOne({ username: "newSignUpUser" })
+    expect(response.status).toBe(201)
+    expect(response.body.message.length).toBeGreaterThan(0)
+    expect(searchedUser).toHaveProperty('username', 'newsignupuser')
 });
 
 test('POST/signup should return status 500 if no username is provided', async () => {
@@ -113,7 +102,29 @@ test('POST/signup should return status 500 if no username is provided', async ()
         .send({
             password: "12345678"
         })
-expect(response.status).toBe(500)
+    expect(response.status).toBe(500)
+});
+
+test('POST/users/:username/locations If not in users location. Should return a 200 status. Location should be in the Food Locations Database and Location should be added to the users locations array ', async () => {
+    const lat = 99.1238
+    const lng = 1.0324
+    const response = await request(dummyApp)
+        .post(`/users/${dummyUsers.user2.username}/locations`)
+        .send({
+            name: "Cafe Koffee",
+            lat: lat,
+            lng: lng
+        })
+
+    const cafeInDB = await FoodLocation.find({ lat: lat, lng:lng })
+    const user = await User.findOne({username: dummyUsers.user2.username})
+    let locationExists = 0
+    if(user.locations.indexOf(cafeInDB[0]._id) > -1){
+        locationExists = 1
+    }
+    expect(response.status).toBe(200)
+    expect(cafeInDB.length).toBe(1)
+    expect(locationExists).toBe(1)
 });
 
 afterAll(() => {

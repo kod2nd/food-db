@@ -96,10 +96,11 @@ usersRouter.post('/:username/locations', async (req, res, next) => {
     const inputLat = req.body.lat
     const inputLng = req.body.lng
     const requestedLocation = await FoodLocation.findOne({ lat: inputLat, lng: inputLng })
-    const user = await User.findOne({ username: req.params.id })
+    const user = await User.findOne({ username: req.params.username })
     const userId = user._id
     let userLocations = user.locations
 
+    // If the posted location already exists in the database, do not create a new location in the database.
     if (!requestedLocation) {
         const newFoodLocation = new FoodLocation({
             name: req.body.name,
@@ -114,6 +115,7 @@ usersRouter.post('/:username/locations', async (req, res, next) => {
         locationIdToSaveIntoUsers = requestedLocation._id;
     }
 
+    // To check if the user already has the location saved in his account otherwise add to locations list
     if (user.locations.indexOf(locationIdToSaveIntoUsers) === -1) {
         userLocations = [...userLocations, locationIdToSaveIntoUsers]
         await User.findByIdAndUpdate(userId, { locations: userLocations })
