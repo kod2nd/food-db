@@ -105,27 +105,89 @@ test('POST/signup should return status 500 if no username is provided', async ()
     expect(response.status).toBe(500)
 });
 
-test('POST/users/:username/locations If not in users location. Should return a 200 status. Location should be in the Food Locations Database and Location should be added to the users locations array ', async () => {
+describe('POST/users/:username/locations', () => {
+    test('POST/users/:username/locations If posted location is not in users location. Should return a 200 status. Location should be in the Food FoodLocations Database and the location should be added to the users locations array ', async () => {
+        const lat = 99.1238
+        const lng = 1.0324
+        const user = await User.findOne({ username: dummyUsers.user2.username })
+        const response = await request(dummyApp)
+            .post(`/users/${user._id}/locations`)
+            .send({
+                name: "Cafe Koffee",
+                lat: lat,
+                lng: lng
+            })
+
+        const cafeInDB = await FoodLocation.find({ lat: lat, lng: lng })
+        const updatedUser = await User.findOne({ username: dummyUsers.user2.username })
+        let locationExists = 0
+        if (updatedUser.locations.indexOf(cafeInDB[0]._id) > -1) {
+            locationExists = 1
+        }
+        expect(response.status).toBe(200)
+        expect(cafeInDB.length).toBe(1)
+        expect(locationExists).toBe(1)
+    });
+
+    test('POST/users/:username/locations If a posted location already exists in the users account, return a 400 status.', async () => {
+        const lat = 99.1238
+        const lng = 1.0324
+        const user = await User.findOne({ username: dummyUsers.user1.username })
+        const postingLocation = async () => {
+            return (
+                await request(dummyApp)
+                    .post(`/users/${user._id}/locations`)
+                    .send({
+                        name: "Cafe Koffee",
+                        lat: lat,
+                        lng: lng
+                    }))
+        }
+
+        await postingLocation()
+        const response = await postingLocation()
+
+        expect(response.status).toBe(400)
+    });
+})
+
+test('GET/users/:username/locations to return an array', async () => {
+    const response = await request(dummyApp).get(`/users/${dummyUsers.user1._id}/locations`)
+    expect(response.status).toBe(200)
+    expect(Array.isArray(response.body)).toBe(true)
+});
+
+test('Delete/users/:username/locations/:locationid to return status of 200 if supplied with a valid ID', async () => {
     const lat = 99.1238
     const lng = 1.0324
-    const response = await request(dummyApp)
-        .post(`/users/${dummyUsers.user2.username}/locations`)
+    await request(dummyApp)
+        .post(`/users/${dummyUsers.user1._id}/locations`)
         .send({
             name: "Cafe Koffee",
             lat: lat,
             lng: lng
         })
-
-    const cafeInDB = await FoodLocation.find({ lat: lat, lng:lng })
-    const user = await User.findOne({username: dummyUsers.user2.username})
-    let locationExists = 0
-    if(user.locations.indexOf(cafeInDB[0]._id) > -1){
-        locationExists = 1
-    }
+    const locationToDelete = await FoodLocation.findOne({ lat: lat, lng: lng })
+    const response = await request(dummyApp).delete(`/users/${dummyUsers.user1._id}/locations/${locationToDelete._id}`)
     expect(response.status).toBe(200)
-    expect(cafeInDB.length).toBe(1)
-    expect(locationExists).toBe(1)
 });
+
+test('Delete/users/:username/locations/:locationid to return status of 400 if a wrong locationid is supplied', async () => {
+    const lat = 99.1238
+    const lng = 1.0324
+    const wrongLocationID = '2wrong4anID'
+    await request(dummyApp)
+        .post(`/users/${dummyUsers.user1._id}/locations`)
+        .send({
+            name: "Cafe Koffee",
+            lat: lat,
+            lng: lng
+        })
+    const locationToDelete = await FoodLocation.findOne({ lat: lat, lng: lng })
+    const response = await request(dummyApp).delete(`/users/${dummyUsers.user1._id}/locations/${wrongLocationID}`)
+    expect(response.status).toBe(400)
+});
+
 
 afterAll(() => {
     mongoose.disconnect();

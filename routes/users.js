@@ -57,7 +57,7 @@ usersRouter.get('/', async (req, res, next) => {
 
 usersRouter.get('/:id', async (req, res, next) => {
     try {
-        const user = await User.findById(req.params.id)
+        const user = await User.findById(req.params.id).populate('locations')
         res.json(user)
     } catch (error) {
         next()
@@ -91,36 +91,67 @@ usersRouter.delete('/:id', async (req, res, next) => {
     })
 })
 
-usersRouter.post('/:username/locations', async (req, res, next) => {
-    let locationIdToSaveIntoUsers
-    const inputLat = req.body.lat
-    const inputLng = req.body.lng
-    const requestedLocation = await FoodLocation.findOne({ lat: inputLat, lng: inputLng })
-    const user = await User.findOne({ username: req.params.username })
-    const userId = user._id
-    let userLocations = user.locations
+usersRouter.post('/:id/locations', async (req, res, next) => {
+    try {
+        let locationIdToSaveIntoUsers
+        const inputLat = req.body.lat
+        const inputLng = req.body.lng
+        const requestedLocation = await FoodLocation.findOne({ lat: inputLat, lng: inputLng })
+        const user = await User.findById(req.params.id)
+        const userId = user._id
+        let userLocations = user.locations
 
-    // If the posted location already exists in the database, do not create a new location in the database.
-    if (!requestedLocation) {
-        const newFoodLocation = new FoodLocation({
-            name: req.body.name,
-            address: req.body.address,
-            lat: req.body.lat,
-            lng: req.body.lng,
-            rating: req.body.rating
-        })
-        locationIdToSaveIntoUsers = (await newFoodLocation.save())._id
+        // If the posted location already exists in the database, do not create a new location in the database.
+        if (!requestedLocation) {
+            const newFoodLocation = new FoodLocation({
+                name: req.body.name,
+                address: req.body.address,
+                lat: req.body.lat,
+                lng: req.body.lng,
+                rating: req.body.rating
+            })
+            locationIdToSaveIntoUsers = (await newFoodLocation.save())._id
 
-    } else {
-        locationIdToSaveIntoUsers = requestedLocation._id;
+        } else {
+            locationIdToSaveIntoUsers = requestedLocation._id;
+        }
+
+        // To check if the user already has the location saved in his account otherwise add to locations list
+        if (user.locations.indexOf(locationIdToSaveIntoUsers) === -1) {
+            userLocations = [...userLocations, locationIdToSaveIntoUsers]
+            await User.findByIdAndUpdate(userId, { locations: userLocations })
+            res.json({ message: "Your location has been added!" })
+        } else { res.status(400).json({ message: "You already have that location saved!" }) }
+    } catch (error) {
+        next(error)
+    }
+})
+
+usersRouter.get('/:id/locations', async (req, res, next) => {
+    try {
+        const user = await User.findById(req.params.id).populate('locations')
+        res.json(user.locations)
+    } catch (error) {
+        next(error)
+    }
+})
+
+usersRouter.delete('/:id/locations/:locationid', async (req, res, next) => {
+    try {
+        const user = await User.findById(req.params.id)
+        let userLocations = user.locations
+        const locationIdPosition = userLocations.indexOf(req.params.locationid)
+        if (locationIdPosition > -1) {
+            userLocations.splice(locationIdPosition, 1)
+            await User.findByIdAndUpdate(req.params.id, { locations: userLocations })
+            res.json({ message: "Removed location successfully!" })
+        } else {
+            res.status(400).json({ Error: "locationid not found!" })
+        }
+    } catch (error) {
+        next(error)
     }
 
-    // To check if the user already has the location saved in his account otherwise add to locations list
-    if (user.locations.indexOf(locationIdToSaveIntoUsers) === -1) {
-        userLocations = [...userLocations, locationIdToSaveIntoUsers]
-        await User.findByIdAndUpdate(userId, { locations: userLocations })
-        res.json({ message: "Your location has been added!" })
-    } else { res.status(400).json({ message: "You already have that location saved!" }) }
 })
 
 module.exports = (app) => {
