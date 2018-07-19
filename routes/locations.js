@@ -25,7 +25,19 @@ locationsRouter.post('/', passport.authenticate('jwt', { session: false }), chec
 locationsRouter.get('/', async (req, res, next) => {
     try {
         const foodLocation = await FoodLocation.find()
-        res.json(foodLocation)
+
+        const queryKeys = Object.keys(req.query)
+
+        if(queryKeys.length > 0) {
+            const filteredFoodPlaces = foodLocation.filter((location) =>{
+                const casedLocationName = location.name.toLowerCase()
+                return casedLocationName.includes(req.query.name.toLowerCase())
+            })
+            res.json(filteredFoodPlaces)
+        } else {
+            res.json(foodLocation)
+        }
+
     } catch (error) {
         next()
     }
