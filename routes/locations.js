@@ -16,7 +16,7 @@ locationsRouter.post('/', passport.authenticate('jwt', { session: false }), chec
             rating: req.body.rating
         })
         await newFoodLocation.save()
-        res.status(201).json({ message: "Updated food location " + req.body.name })
+        res.status(201).json({ message: "Created food location " + req.body.name })
     } catch (error) {
         next(error)
     }

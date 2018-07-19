@@ -1,201 +1,219 @@
 {
-    "openapi": "3.0.0",
-    "info": {
-      "version": "1.0.0",
-      "title": "Food Trail DB"
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Food Trail DB"
+  },
+  "servers": [
+    {
+      "url": "https://kod2nd-food-db.herokuapp.com/"
+    }
+  ],
+  "components":{
+    "securitySchemes": {
+      "BearerAuth": {
+       "type": "http",
+       "scheme": "bearer"
+      },
     },
-    "servers": [
-      {
-        "url": "https://kod2nd-food-db.herokuapp.com/"
+  },
+  "paths": {
+    "/api-help": {
+      "get": {
+        "summary": "API documentation",
+        "tags": [
+          "API Help Page"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          }
+        }
       }
-    ],
-    "paths": {
-      "/api-help": {
-        "get": {
-          "summary": "API documentation",
-          "tags": [
-            "API Help Page"
-          ],
-          "responses": {
-            "200": {
-              "description": "Successful request"
+    },
+    "/locations": {
+      "get": {
+        "summary": "Shows a list of stored food locations",
+        "tags": [
+          "Locations"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "description": "Filters food locations that contain the supplied query name.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Expected response to a valid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "_id": "5b4ff7d4c0a3f22f040ab498",
+                    "name": "Example Food Place",
+                    "lat": 101.1248,
+                    "lng": 23.231,
+                    "__v": 0
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Bad request"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a location",
+        "tags": [
+        "Locations"
+      ],
+      "security": [{"BearerAuth": []}],
+      "requestBody": {
+        "description": "User must have administrative rights. Creates a location if provided with a lat and lng. Optional fields are name, address and rating",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "example": {
+                "name": "optional",
+                "lat": "101.3152",
+                "lng": "1.08324",
+                "rating": "optional"
+              }
             }
           }
         }
       },
-      "/locations": {
-        "get": {
-          "summary": "Shows a list of stored food locations",
-          "tags": [
-            "Locations"
-          ],
-          "parameters": [
-            {
-              "name": "yrstart",
-              "in": "query",
-              "required": false,
-              "description": "Filters HDBs with lease commence dates greater or equal to than yrstart.\n\nE.g. yrstart = 1980 returns a list of HDBs with lease commences dates later than or including 1980.",
-              "schema": {
-                "type": "number"
-              }
-            },
-            {
-              "name": "yrend",
-              "in": "query",
-              "required": false,
-              "description": "Filter HDBs with lease commence dates greater or equal to than yrend.\n\nE.g. yrend = 2011 returns a list of HDBs with lease commences dates before or including 2011.",
-              "schema": {
-                "type": "number"
-              }
-            },
-            {
-              "name": "rooms",
-              "in": "query",
-              "required": false,
-              "description": " Filter HDBs by flat type (e.g. enter rooms = 3 to retrieve all 3 room flats)",
-              "schema": {
-                "type": "number"
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Expected response to a valid request",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "example": {
-                      "month": "2015-01",
-                      "town": "ANG MO KIO",
-                      "flat_type": "3 ROOM",
-                      "block": "174",
-                      "street_name": "ANG MO KIO AVE 4",
-                      "storey_range": "07 TO 09",
-                      "floor_area_sqm": "60",
-                      "flat_model": "Improved",
-                      "lease_commence_date": "1986",
-                      "remaining_lease": "70",
-                      "resale_price": "255000",
-                      "id": 1234
-                    }
+        "responses": {
+          "201": {
+            "description": "Successful Creation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "message": "Created food location NEW_FOOD_LOCATION_NAME"
                   }
                 }
               }
-            },
-            "404": {
-              "description": "Bad request"
+            }
+          },
+          "500": {
+            "description": "ERROR - error message"
+          }
+        }
+      }
+    },
+    "/locations/{id}": {
+      "get": {
+        "summary": "Shows a list of stored food locations",
+        "tags": [
+          "Locations"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Displayes a single food location based on its id",
+            "schema": {
+              "type": "string"
             }
           }
-        },
-        "post": {
-          "summary": "Shows a list of stored food locations",
-          "tags": [
-            "Locations"
-          ],
-          "parameters": [
-            {
-              "name": "yrstart",
-              "in": "query",
-              "required": false,
-              "description": "Filters HDBs with lease commence dates greater or equal to than yrstart.\n\nE.g. yrstart = 1980 returns a list of HDBs with lease commences dates later than or including 1980.",
-              "schema": {
-                "type": "number"
-              }
-            },
-            {
-              "name": "yrend",
-              "in": "query",
-              "required": false,
-              "description": "Filter HDBs with lease commence dates greater or equal to than yrend.\n\nE.g. yrend = 2011 returns a list of HDBs with lease commences dates before or including 2011.",
-              "schema": {
-                "type": "number"
-              }
-            },
-            {
-              "name": "rooms",
-              "in": "query",
-              "required": false,
-              "description": " Filter HDBs by flat type (e.g. enter rooms = 3 to retrieve all 3 room flats)",
-              "schema": {
-                "type": "number"
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Expected response to a valid request",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "example": {
-                      "month": "2015-01",
-                      "town": "ANG MO KIO",
-                      "flat_type": "3 ROOM",
-                      "block": "174",
-                      "street_name": "ANG MO KIO AVE 4",
-                      "storey_range": "07 TO 09",
-                      "floor_area_sqm": "60",
-                      "flat_model": "Improved",
-                      "lease_commence_date": "1986",
-                      "remaining_lease": "70",
-                      "resale_price": "255000",
-                      "id": 1234
-                    }
+        ],
+        "responses": {
+          "200": {
+            "description": "Expected response to a valid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "_id": "5b4ff7d4c0a3f22f040ab498",
+                    "name": "Example Food Place",
+                    "lat": 101.1248,
+                    "lng": 23.231,
+                    "__v": 0
                   }
                 }
               }
-            },
-            "404": {
-              "description": "Bad request"
+            }
+          },
+          "404": {
+            "description": "Bad request"
+          }
+        }
+      },        
+      "put": {
+        "summary": "Shows a single HDB",
+        "tags": [
+          "Locations"
+        ],
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Filters HDB by id. Returns a single HDB object.",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+        "description": "User must have administrative rights. Creates a location if provided with a lat and lng. Optional fields are name, address and rating",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "example": {
+                "name": "optional",
+                "lat": "101.3152",
+                "lng": "1.08324",
+                "rating": "optional"
+              }
             }
           }
         }
       },
-      "/locations/{id}": {
-        "put": {
-          "summary": "Shows a single HDB",
-          "tags": [
-            "HDB Resale lists"
-          ],
-          "parameters": [
-            {
-              "name": "id",
-              "in": "path",
-              "required": true,
-              "description": "Filters HDB by id. Returns a single HDB object.",
-              "schema": {
-                "type": "number"
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Request Valid!"
+        "responses": {
+          "200": {
+            "description": "Request Valid!"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Shows a single HDB",
+        "tags": [
+          "Locations"
+        ],
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Filters HDB by id. Returns a single HDB object.",
+            "schema": {
+              "type": "number"
             }
           }
-        },
-        "delete": {
-          "summary": "Shows a single HDB",
-          "tags": [
-            "HDB Resale lists"
-          ],
-          "parameters": [
-            {
-              "name": "id",
-              "in": "path",
-              "required": true,
-              "description": "Filters HDB by id. Returns a single HDB object.",
-              "schema": {
-                "type": "number"
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Request Valid!"
-            }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request Valid!"
           }
         }
       }
     }
   }
+}
