@@ -222,6 +222,20 @@ test('POST/signup should return status 500 if no username is provided', async ()
 });
 
 describe('POST/users/:id/locations', () => {
+    test('POST/users/:id/locations a User can only add his own locations', async () => {
+        const lat = 99.1238
+        const lng = 1.0324
+        const response = await request(dummyApp)
+            .post(`/users/${dummyUsers.user1._id}/locations`)
+            .send({
+                name: "Cafe Koffee",
+                lat: lat,
+                lng: lng
+            })
+            .set("Authorization", "Some wrong token")
+        expect(response.status).toBe(401)
+    });
+
     test('POST/users/:id/locations If posted location is not in users location. Should return a 200 status. Location should be in the Food FoodLocations Database and the location should be added to the users locations array ', async () => {
         const lat = 99.1238
         const lng = 1.0324
