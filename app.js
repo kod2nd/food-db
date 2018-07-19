@@ -10,7 +10,7 @@ app.use(passport.initialize())
 // API-Documentation
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger-deploy.json');
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api-help', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Routes
 const indexRouter = require('./routes/index')
