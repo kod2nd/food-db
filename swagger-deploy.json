@@ -296,7 +296,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "User must be logged in or have administrative rights to access. Displayes a user based on its id",
+            "description": "User must be logged in or have administrative rights to access. Displays a user based on the user id",
             "schema": {
               "type": "string"
             }
@@ -401,6 +401,127 @@
               "type": "string"
             }
           }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Delete"
+          },
+          "401": {
+            "description": "Unauthorised"
+          },          
+          "404": {
+            "description": "Invalid request!"
+          }
+        }
+      }
+    },
+    "/users/{id}/locations": {
+      "get": {
+        "summary": "Displays the details of the locations a user has saved",
+        "tags": [
+          "Users"
+        ],
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User must be logged in or have administrative rights to access. Displays locations of a user based on the id input",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Expected response to a valid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": 
+                    [
+                      "loc1",
+                      "loc2",
+                      "loc3"
+                    ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorised"
+          },          
+          "500": {
+            "description": "ERROR! - error message"
+          }
+        }
+      },
+      "post": {
+        "summary": "Posts a location to the user locations arrary",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User must be logged in or have administrative rights to access. Adds a single food location's id to the user locations array based on the specified lat and lng key-value pairs specified in the request body. If a location does not exist in the Food Locations Database, the posted location will be added to the Food Locations Database. However, if the location already exists in the Food Locations database, the location's ID will be appended to the user's location array but the location will not be stored in the Food Locations Database. ",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful create"
+          },
+          "401": {
+            "description": "Unauthorised"
+          },          
+          "500": {
+            "description": "ERROR! - error message"
+          }
+        }
+      }
+    },
+    "/users/{id}/locations/{locationid}": {
+      "delete": {
+        "summary": "Deletes a single user",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "User must be logged in or have administrative rights to access. Removes a single location from the user Array based on the specified location ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationid",
+            "in": "path",
+            "required": true,
+            "description": "Location ID",
+            "schema": {
+              "type": "string"
+            }
+          }          
         ],
         "responses": {
           "200": {
