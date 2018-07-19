@@ -153,7 +153,7 @@
         }
       },        
       "put": {
-        "summary": "Shows a single HDB",
+        "summary": "Updates details of a stored location",
         "tags": [
           "Locations"
         ],
@@ -163,23 +163,20 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "Filters HDB by id. Returns a single HDB object.",
+            "description": "Update the details of the location of the specified ID",
             "schema": {
               "type": "number"
             }
           }
         ],
         "requestBody": {
-        "description": "User must have administrative rights. Creates a location if provided with a lat and lng. Optional fields are name, address and rating",
+        "description": "User must have administrative rights. Updates details of the specified location based on the key-value pairs passed in the request body.",
         "required": true,
         "content": {
           "application/json": {
             "schema": {
               "example": {
-                "name": "optional",
-                "lat": "101.3152",
-                "lng": "1.08324",
-                "rating": "optional"
+                "name": "updated name"
               }
             }
           }
@@ -187,7 +184,7 @@
       },
         "responses": {
           "200": {
-            "description": "Request Valid!"
+            "description": "Successful update!"
           }
         }
       },
