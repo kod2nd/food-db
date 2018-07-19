@@ -88,13 +88,14 @@ test('GET/locations/:id should return the location based on the id that the user
 
 test('POST/locations Lat and Lng are required fields. Should return a 500 status if required field(s) are not presented.', async () => {
     const response = await request(dummyApp)
-            .post('/locations')
-            .send({
-                name: "Without lng",
-                address: "Without lng",
-                lat: 103.841602,
-                rating: 0
-            })
+        .post('/locations')
+        .send({
+            name: "Without lng",
+            address: "Without lng",
+            lat: 103.841602,
+            rating: 0
+        })
+        .set("Authorization", adminBearerjwtToken)
     expect(response.status).toBe(500)
 });
 
@@ -109,6 +110,7 @@ test('POST/locations should return a 201 status and increase the Food locations 
                 lng: 1.279451,
                 rating: 7
             })
+            .set("Authorization", adminBearerjwtToken)
         expect(response.status).toBe(201)
         const updatedList = await request(dummyApp).get('/locations')
         const newLocationSearch = await FoodLocation.find({ name: "Posted name" })
@@ -117,14 +119,16 @@ test('POST/locations should return a 201 status and increase the Food locations 
     });
 
 test('PUT/locations/:id should return a message that a location has been updated. Should also update the location in the db', async () => {
-    const response = await request(dummyApp).put(`/locations/${dummyLocations.location2._id}`).send({ name: "updated name" })
+    const response = await request(dummyApp).put(`/locations/${dummyLocations.location2._id}`).send({ name: "updated name" }).set("Authorization", adminBearerjwtToken)
     const searchedLocation = await FoodLocation.findById(dummyLocations.location2._id)
     expect(response.status).toBe(200)
     expect(searchedLocation.name).toBe("updated name")
 });
 
 test('DELETE/locations/:id should return a 200 status and remove the deleted location from the list', async () => {
-    const response = await request(dummyApp).delete(`/locations/${dummyLocations.location1._id}`).set("Authorization", adminBearerjwtToken)
+    const response = await request(dummyApp)
+        .delete(`/locations/${dummyLocations.location1._id}`)
+        .set("Authorization", adminBearerjwtToken)
     const searchedLocation = await FoodLocation.find({ _id: dummyLocations.location1._id })
     expect(response.status).toBe(200)
     expect(searchedLocation.length).toBe(0)

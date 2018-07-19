@@ -2,10 +2,11 @@ const express = require('express')
 const locationsRouter = express.Router()
 const FoodLocation = require('../models/location')
 const { passport } = require('../config/passport')
+const checkIfAdmin = require('../middlewares/checkIfAdmin')
 locationsRouter.use(express.json())
 
 
-locationsRouter.post('/', async (req, res, next) => {
+locationsRouter.post('/', passport.authenticate('jwt', { session: false }), checkIfAdmin, async (req, res, next) => {
     try {
         const newFoodLocation = new FoodLocation({
             name: req.body.name,
@@ -39,7 +40,7 @@ locationsRouter.get('/:id', async (req, res, next) => {
     }
 })
 
-locationsRouter.put('/:id', async (req, res, next) => {
+locationsRouter.put('/:id', passport.authenticate('jwt', { session: false }), checkIfAdmin, async (req, res, next) => {
     try {
         const toUpdate = FoodLocation.findByIdAndUpdate(req.params.id, req.body)
         const selectedFoodLocation = await FoodLocation.findById(req.params.id)
@@ -47,25 +48,21 @@ locationsRouter.put('/:id', async (req, res, next) => {
             if (error) {
                 next()
             }
-        const FoodLocationAfterUpdate = await FoodLocation.findById(req.params.id)
-        res.json({
-            message: "Successfully updated!",
-            id: req.params.id,
-            name: FoodLocationAfterUpdate.name,
-            address: FoodLocationAfterUpdate.address,
-            rating: FoodLocationAfterUpdate.rating,
+            const FoodLocationAfterUpdate = await FoodLocation.findById(req.params.id)
+            res.json({
+                message: "Successfully updated!",
+                id: req.params.id,
+                name: FoodLocationAfterUpdate.name,
+                address: FoodLocationAfterUpdate.address,
+                rating: FoodLocationAfterUpdate.rating,
+            })
         })
-    })
     } catch (error) {
-    next()
-}
+        next()
+    }
 })
 
-locationsRouter.delete('/:id', passport.authenticate('jwt', { session: false }), async (req, res, next) => {
-    if (req.user.admin !== true) {
-        res.status(401).json({ message: "You do not have the required access rights!" })
-        return
-    }
+locationsRouter.delete('/:id', passport.authenticate('jwt', { session: false }), checkIfAdmin, async (req, res, next) => {
     const toDelete = FoodLocation.findByIdAndDelete(req.params.id)
     await toDelete.exec(error => {
         if (error) {

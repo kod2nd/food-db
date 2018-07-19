@@ -16,8 +16,8 @@ let dummyUsers = {}
 
 const addDummyUsers = async () => {
     const userAdmin = new User({
-        username: "admin",
-        name: "Admin",
+        username: "admintester",
+        name: "Admin Tester",
         age: 100,
         admin: true,
         locations: []
@@ -45,10 +45,34 @@ const addDummyUsers = async () => {
     dummyUsers.user2 = await user2.save()
 }
 
+// User Login
+let BearerjwtToken
+
+const signUp = async (username, isAdmin = false) => {
+    let signUpResponse = await request(dummyApp)
+        .post('/users/signup')
+        .send({
+            username: username,
+            password: "12345678",
+            admin: isAdmin
+        });
+}
+
+const signIn = async (username) => {
+    let signInResponse = await request(dummyApp)
+        .post('/users/signin')
+        .send({
+            username: username,
+            password: "12345678"
+        })
+    BearerjwtToken = "bearer " + signInResponse.body.token;
+}
+
 beforeAll(async () => {
     jest.setTimeout(120000);
     const uri = await mongod.getConnectionString();
     await mongoose.connect(uri)
+
 })
 
 beforeEach(async () => {
@@ -56,17 +80,46 @@ beforeEach(async () => {
     await addDummyUsers()
 })
 
-test('GET/users body should have length 3 ', async () => {
-    const response = await request(dummyApp).get('/users')
+test('GET/users body should have length 4 (3 Dummy Users and 1 new signup) ', async () => {
+    const username = "admin1"
+    await signUp(username, true)
+    await signIn(username)
+    const response = await request(dummyApp).get('/users').set("Authorization", BearerjwtToken)
     expect(response.status).toBe(200)
-    expect(response.body.length).toBe(3)
+    expect(response.body.length).toBe(4)
 });
 
-test('GET/:id should return the user searched for', async () => {
-    const response = await request(dummyApp).get(`/users/${dummyUsers.userAdmin._id}`)
-    expect(response.status).toBe(200)
-    expect(response.body._id).toBe(String(dummyUsers.userAdmin._id))
-});
+describe('GET/:id Admin or the user himself can send a GET request for a specific user', ()=>{
+    test('GET/:id should return the user searched for. Admin has access to the User.', async () => {
+        const username = "admin1"
+        await signUp(username, true)
+        await signIn(username)
+        const response = await request(dummyApp).get(`/users/${dummyUsers.user1._id}`).set("Authorization", BearerjwtToken)
+        expect(response.status).toBe(200)
+        expect(response.body._id).toBe(String(dummyUsers.user1._id))
+    });
+    
+    test('GET/:id should return the user searched for. User himself has access to the User.', async () => {
+        const username = "userfortest"
+        await signUp(username, false)
+        await signIn(username)
+
+        const userForTest = await User.findOne({username: "userfortest"})
+
+        const response = await request(dummyApp).get(`/users/${userForTest._id}`).set("Authorization", BearerjwtToken)
+        expect(response.status).toBe(200)
+        expect(response.body._id).toBe(String(userForTest._id))
+    });
+
+    test('GET/:id A user should not be able to access another user using the GET request. Return 401 status .', async () => {
+        const username = "faileduser"
+        await signUp(username, false)
+        await signIn(username)
+        const response = await request(dummyApp).get(`/users/${dummyUsers.user1._id}`).set("Authorization", BearerjwtToken)
+        expect(response.status).toBe(401)
+    });
+
+})
 
 
 test('PUT/users/:id should return a message that a user has been updated. Should also update the user in the db', async () => {

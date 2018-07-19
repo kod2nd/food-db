@@ -10,14 +10,14 @@ const userSchema = mongoose.Schema(
       unique: true,
       required: [true, "cannot be blank"],
       match: [/^[a-zA-Z0-9\s]+$/, "is invalid"],
-      index: true 
+      index: true
     },
     name: String,
     age: Number,
     admin: Boolean,
     hash: String,
     salt: String,
-    locations: [{type: mongoose.Schema.Types.ObjectId, ref: "FoodLocation"}]
+    locations: [{ type: mongoose.Schema.Types.ObjectId, ref: "FoodLocation" }]
   },
   { timestamps: true }
 );

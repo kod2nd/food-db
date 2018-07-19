@@ -5,6 +5,8 @@ const FoodLocation = require('../models/location')
 const jwt = require('jsonwebtoken')
 const { passport, jwtOptions } = require('../config/passport')
 const mongoose = require('mongoose')
+const checkIfAdmin = require('../middlewares/checkIfAdmin')
+const checkIfUserOrAdmin = require('../middlewares/checkIfUserOrAdmin')
 
 usersRouter.use(express.json())
 
@@ -46,7 +48,7 @@ usersRouter.post("/signin", async (req, res) => {
     }
 });
 
-usersRouter.get('/', async (req, res, next) => {
+usersRouter.get('/', passport.authenticate('jwt', { session: false }), checkIfAdmin, async (req, res, next) => {
     try {
         const users = await User.find().populate('locations')
         res.json(users)
@@ -55,7 +57,8 @@ usersRouter.get('/', async (req, res, next) => {
     }
 })
 
-usersRouter.get('/:id', async (req, res, next) => {
+usersRouter.get('/:id', passport.authenticate('jwt', { session: false }), checkIfUserOrAdmin, async (req, res, next) => {
+
     try {
         const user = await User.findById(req.params.id).populate('locations')
         res.json(user)
