@@ -58,7 +58,6 @@ usersRouter.get('/', passport.authenticate('jwt', { session: false }), checkIfAd
 })
 
 usersRouter.get('/:id', passport.authenticate('jwt', { session: false }), checkIfUserOrAdmin, async (req, res, next) => {
-
     try {
         const user = await User.findById(req.params.id).populate('locations')
         res.json(user)
@@ -67,7 +66,7 @@ usersRouter.get('/:id', passport.authenticate('jwt', { session: false }), checkI
     }
 })
 
-usersRouter.put('/:id', async (req, res, next) => {
+usersRouter.put('/:id', passport.authenticate('jwt', { session: false }), checkIfUserOrAdmin, async (req, res, next) => {
     try {
         const toUpdate = User.findByIdAndUpdate(req.params.id, req.body)
         const selectedUser = await User.findById(req.params.id)
@@ -84,7 +83,7 @@ usersRouter.put('/:id', async (req, res, next) => {
     }
 })
 
-usersRouter.delete('/:id', async (req, res, next) => {
+usersRouter.delete('/:id', passport.authenticate('jwt', { session: false }), checkIfUserOrAdmin, async (req, res, next) => {
     const toDelete = User.findByIdAndDelete(req.params.id)
     await toDelete.exec(error => {
         if (error) {
@@ -94,7 +93,7 @@ usersRouter.delete('/:id', async (req, res, next) => {
     })
 })
 
-usersRouter.post('/:id/locations', async (req, res, next) => {
+usersRouter.post('/:id/locations', passport.authenticate('jwt', { session: false }), checkIfUserOrAdmin, async (req, res, next) => {
     try {
         let locationIdToSaveIntoUsers
         const inputLat = req.body.lat
@@ -130,7 +129,7 @@ usersRouter.post('/:id/locations', async (req, res, next) => {
     }
 })
 
-usersRouter.get('/:id/locations', async (req, res, next) => {
+usersRouter.get('/:id/locations', passport.authenticate('jwt', { session: false }), async (req, res, next) => {
     try {
         const user = await User.findById(req.params.id).populate('locations')
         res.json(user.locations)
@@ -139,7 +138,7 @@ usersRouter.get('/:id/locations', async (req, res, next) => {
     }
 })
 
-usersRouter.delete('/:id/locations/:locationid', async (req, res, next) => {
+usersRouter.delete('/:id/locations/:locationid', passport.authenticate('jwt', { session: false }), checkIfUserOrAdmin, async (req, res, next) => {
     try {
         const user = await User.findById(req.params.id)
         let userLocations = user.locations
