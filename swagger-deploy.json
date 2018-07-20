@@ -284,6 +284,42 @@
         }
       }
     },
+    "/users/signup": {
+      "post": {
+        "summary": "User Sign up",
+        "tags": [
+          "Users"
+        ],
+        "security": [],
+        "description": "Request body should have username and password key-value pairs.",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "404": {
+            "description": "Invalid request"
+          }          
+        }
+      }
+    },
+    "/users/signin": {
+      "post": {
+        "summary": "User Sign in",
+        "tags": [
+          "Users"
+        ],
+        "security": [],
+        "description": "Request body should have username and password key-value pairs. Bearer auth token will be returned",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "404": {
+            "description": "Invalid request"
+          }          
+        }
+      }
+    },      
     "/users/{id}": {
       "get": {
         "summary": "Shows details of a single user",
