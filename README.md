@@ -19,7 +19,7 @@
 This JWT Token authorisation based server/database is designed to create, read, update and delete user food locations.
 
 #### .env file
-* To use jwt passport authentication, .env file containing JWT_SECRET="yoursecret" is required. 
+* To use jwt passport authentication, .env file containing the passport secret is required. 
 
 #### Models
 * user.js
