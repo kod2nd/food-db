@@ -1,13 +1,9 @@
 const express = require('express')
 const indexRouter = express.Router()
 indexRouter.use(express.json())
+const {welcomeMessage} = require('../middlewares/indexHelper')
 
-indexRouter.get('/', (req, res, next) => {
-    res.json({
-        message: "Welcome!",
-        help: "Please refer to /api-docs for help"
-    })
-})
+indexRouter.get('/', welcomeMessage )
 
 module.exports = (app) => {
     app.use('/', indexRouter)

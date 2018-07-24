@@ -4,23 +4,10 @@ const FoodLocation = require('../models/location')
 const { passport } = require('../config/passport')
 const checkIfAdmin = require('../middlewares/checkIfAdmin')
 locationsRouter.use(express.json())
+const locationsHelper = require('../middlewares/locationsHelper')
 
 
-locationsRouter.post('/', passport.authenticate('jwt', { session: false }), checkIfAdmin, async (req, res, next) => {
-    try {
-        const newFoodLocation = new FoodLocation({
-            name: req.body.name,
-            address: req.body.address,
-            lat: req.body.lat,
-            lng: req.body.lng,
-            rating: req.body.rating
-        })
-        await newFoodLocation.save()
-        res.status(201).json({ message: "Created food location " + req.body.name })
-    } catch (error) {
-        next(error)
-    }
-})
+locationsRouter.post('/', passport.authenticate('jwt', { session: false }), checkIfAdmin, locationsHelper.createNewFoodLocation)
 
 locationsRouter.get('/', async (req, res, next) => {
     try {
@@ -28,8 +15,8 @@ locationsRouter.get('/', async (req, res, next) => {
 
         const queryKeys = Object.keys(req.query)
 
-        if(queryKeys.length > 0) {
-            const filteredFoodPlaces = foodLocation.filter((location) =>{
+        if (queryKeys.length > 0) {
+            const filteredFoodPlaces = foodLocation.filter((location) => {
                 const casedLocationName = location.name.toLowerCase()
                 return casedLocationName.includes(req.query.name.toLowerCase())
             })
