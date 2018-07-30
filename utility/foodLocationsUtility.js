@@ -12,6 +12,7 @@ const sendSuccessfulCreationMessage = (req, res) => {
     return res.status(201).json({ message: "Created food location " + req.body.name })
 }
 
+
 module.exports = { 
     locationsInputFields,
     sendSuccessfulCreationMessage
