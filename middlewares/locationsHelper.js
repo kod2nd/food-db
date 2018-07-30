@@ -1,16 +1,13 @@
 const FoodLocation = require('../models/location')
+const { locationsInputFields, sendSuccessfulCreationMessage } = require('../utility/foodLocationsUtility')
 
 const createNewFoodLocation = async (req, res, next) => {
     try {
-        const newFoodLocation = new FoodLocation({
-            name: req.body.name,
-            address: req.body.address,
-            lat: req.body.lat,
-            lng: req.body.lng,
-            rating: req.body.rating
-        })
+        const newFoodLocation = new FoodLocation(locationsInputFields(req))
         await newFoodLocation.save()
-        res.status(201).json({ message: "Created food location " + req.body.name })
+
+        sendSuccessfulCreationMessage(req, res)
+
     } catch (error) {
         next(error)
     }
